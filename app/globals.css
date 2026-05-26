@@ -3,24 +3,47 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* PALETA NORVET ARMÓNICA */
+  --norvet-green: #00a651;        /* Verde Principal (Logo) */
+  --norvet-green-dark: #006d36;   /* Verde Profundo (Para secciones oscuras) */
+  --norvet-green-medium: #00c86d; /* Verde Vibrante (Para botones/acentos) */
+  --norvet-green-light: #f0fdf4;  /* Verde Casi Blanco (Para fondos suaves) */
+  --norvet-white: #ffffff;
+  --norvet-gray: #64748b;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+/* Reset Profesional */
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable; 
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  user-select: none;
+  max-width: 100%;
+  height: auto;
+}
+
+button, a {
+  cursor: pointer;
+  transition: all 0.3s ease; /* Aumentamos a 0.3s para que sea más fluido */
+}
+
+::selection {
+  background-color: var(--norvet-green);
+  color: white;
 }
