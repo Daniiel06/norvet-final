@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation, Pagination } from "swiper/modules";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import Link from "next/link"; // <--- IMPORTANTE: Importamos Link para la navegación
+import Link from "next/link";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -15,15 +15,15 @@ import "swiper/css/pagination";
 const slides = [
   {
     id: 1,
-    image: "/images/hero-1.jpg",
+    image: "/images/hero-01.jpg",
     title: "Soluciones Veterinarias Profesionales",
     subtitle: "Productos de calidad superior para el cuidado y bienestar animal.",
   },
   {
     id: 2,
     image: "/images/hero-2.jpg",
-    title: "Distribución Veterinaria Especializada",
-    subtitle: "Conectamos a las marcas líderes del sector con tu negocio.",
+    title: "Líderes en Productos Veterinarios",
+    subtitle: "Calidad, confianza y soluciones integrales para el cuidado animal.",
   },
   {
     id: 3,
@@ -83,7 +83,7 @@ export default function HeroSlider() {
                           <motion.h1
                             variants={{
                               hidden: { opacity: 0, x: -30 },
-                              visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } }
+                              visible: { opacity: 1, x: 0, transition: { duration: 0.9, ease: "easeOut" } }
                             }}
                             className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl leading-[1.1]"
                           >
