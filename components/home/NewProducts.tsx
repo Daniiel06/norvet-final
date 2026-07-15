@@ -1,21 +1,55 @@
 "use client";
-
-import { products } from "@/data/products";
+import { useState, useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 import ProductCard from "./ProductCard";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper/modules";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import "swiper/css";
 import "swiper/css/navigation";
 
 export default function NewProducts() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchLatestProducts() {
+      setLoading(true);
+      try {
+        // Traemos los 8 productos más recientes
+        // Ordenamos por fecha_creacion de forma descendente (los más nuevos primero)
+        const { data, error } = await supabase
+          .from("productos")
+          .select("*")
+          .order("fecha_creacion", { ascending: false })
+          .limit(8);
+
+        if (error) throw error;
+        setProducts(data || []);
+      } catch (error) {
+        console.error("Error cargando productos nuevos:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLatestProducts();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="h-[500px] flex items-center justify-center bg-gradient-to-br from-[#004d26] to-[#004d26]">
+        <Loader2 className="animate-spin text-white" size={40} />
+      </div>
+    );
+  }
+
+  if (products.length === 0) return null; // No mostrar la sección si no hay productos
+
   return (
-    // GRADIENTE ARMÓNICO: De un verde muy oscuro a un verde marca profundo
     <section className="relative overflow-hidden bg-gradient-to-br from-[#004d26] via-[var(--norvet-green-dark)] to-[#004d26] py-24 px-6 sm:px-12 md:px-16">
 
-      {/* Círculo de luz decorativo para que el fondo no sea plano */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--norvet-green)] opacity-20 blur-[120px] pointer-events-none" />
 
       <div className="mx-auto w-full max-w-[1280px] relative z-10">
@@ -35,7 +69,6 @@ export default function NewProducts() {
             </h2>
           </motion.div>
 
-          {/* ARROWS - Ahora con blanco puro y transparencia */}
           <div className="hidden gap-4 md:flex">
             <button className="products-prev flex h-14 w-14 items-center justify-center rounded-full border border-white/30 text-white transition-all hover:bg-white hover:text-[var(--norvet-green-dark)] active:scale-90">
               <ChevronLeft size={24} />
@@ -68,10 +101,15 @@ export default function NewProducts() {
         >
           {products.map((product) => (
             <SwiperSlide key={product.id} className="flex justify-center">
+              {/* 
+                  IMPORTANTE: Mapeamos los nombres de la DB a las Props del componente.
+                  nombre -> name
+                  imagen_url -> image
+              */}
               <ProductCard
                 id={product.id}
-                name={product.name}
-                image={product.image}
+                name={product.nombre}
+                image={product.imagen_url || "/images/placeholder.jpg"}
               />
             </SwiperSlide>
           ))}

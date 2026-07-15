@@ -1,115 +1,181 @@
 "use client";
-
-import Image from "next/image";
-import { Search } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
-
-const NAV_LINKS = [
-  { name: "Inicio", href: "/" },
-  { name: "Productos", href: "/productos" },
-  { name: "Noticias", href: "/noticias" },
-  { name: "Nosotros", href: "/nosotros" },
-  { name: "Contacto", href: "/contacto" },
-];
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { Search, X as CloseIcon, Menu } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 
 export default function Navbar() {
-  const [searchQuery, setSearchQuery] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const router = useRouter();
-  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20); // Activamos el efecto más rápido (20px)
+      setIsScrolled(window.scrollY > 20);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSearch = () => {
+  // Búsqueda predictiva
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (searchQuery.length < 3) {
+        setSearchResults([]);
+        return;
+      }
+      const { data } = await supabase
+        .from("productos")
+        .select("id, nombre, imagen_url, descripcion_corta")
+        .ilike("nombre", `%${searchQuery}%`) 
+        .limit(5);
+      setSearchResults(data || []);
+    };
+
+    const timeoutId = setTimeout(() => {
+      // @ts-ignore
+      fetchSuggestions();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // FUNCION CORREGIDA: Ahora limpia el desplegable al buscar
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/productos?search=${encodeURIComponent(searchQuery)}`);
+      setSearchResults([]); 
+      router.push(`/productos?search=${searchQuery}`);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") handleSearch();
-  };
+  const navLinks = [
+    { name: "INICIO", href: "/" },
+    { name: "PRODUCTOS", href: "/productos" },
+    { name: "NOTICIAS", href: "/noticias" },
+    { name: "NOSOTROS", href: "/nosotros" },
+    { name: "CONTACTO", href: "/contacto" },
+  ];
 
   return (
-    <header 
-      className={`fixed top-10 left-0 z-50 w-full transition-all duration-500 ${
-        isScrolled 
-        ? "bg-white/80 backdrop-blur-lg border-b border-gray-100 shadow-sm" 
-        : "bg-transparent border-b border-transparent"
-      }`}
-    >
-      {/* Fijamos la altura en h-20 siempre, para que NO haya saltos al hacer scroll */}
-      <div className="mx-auto flex h-20 max-w-[1280px] items-center justify-between px-6 sm:px-12 md:px-16">
-        
-        {/* LOGO */}
-        <div className="flex items-center flex-shrink-0 transition hover:opacity-90">
-          <Image 
-            src="/images/logo.png" 
-            alt="Norvet Salud Animal" 
-            width={130} 
-            height={40} 
-            priority 
-            className="h-auto w-auto object-contain" 
-          />
-        </div>
+    <>
+      <header 
+        className={`fixed top-10 left-0 z-50 w-full transition-all duration-500 ${
+          isScrolled 
+          ? "bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm py-2" 
+          : "bg-transparent py-4"
+        }`}
+      >
+        <div className="max-w-[1440px] mx-auto px-6 flex items-center justify-between">
+          
+          {/* LOGO */}
+          <Link href="/" className="relative h-12 w-40 flex items-center">
+            <Image 
+              src="/images/logo.png" 
+              alt="Norvet Logo" 
+              fill 
+              className="object-contain"
+              priority
+            />
+          </Link>
 
-        {/* MENÚ */}
-        <nav className="hidden items-center gap-8 text-sm font-bold uppercase tracking-wider lg:flex">
-          {NAV_LINKS.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <a 
+          {/* MENU DESKTOP */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navLinks.map((link) => (
+              <Link 
                 key={link.name} 
                 href={link.href} 
-                className={`relative py-2 transition-all duration-300 group ${
-                  isActive 
-                  ? "text-[var(--norvet-green)]" 
-                  : "text-slate-600 hover:text-[var(--norvet-green)]"
-                }`}
+                className="text-slate-600 hover:text-[var(--norvet-green)] font-bold text-sm transition-colors"
               >
                 {link.name}
-                <span className={`absolute bottom-0 left-0 h-0.5 bg-[var(--norvet-green)] transition-all duration-300 ${
-                  isActive ? "w-full" : "w-0 group-hover:w-full"
-                }`}></span>
-              </a>
-            );
-          })}
-        </nav>
+              </Link>
+            ))}
+            
+            {/* BUSCADOR ESTILIZADO */}
+            <div className="relative ml-4">
+              <form onSubmit={handleSearchSubmit} className="relative group">
+                <input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Buscar producto..." 
+                  className="pl-10 pr-12 py-2 rounded-full bg-gray-100/50 border border-transparent focus:bg-white focus:border-emerald-500 text-sm outline-none w-48 lg:w-64 transition-all shadow-inner"
+                />
+                {/* Icono de búsqueda más elegante */}
+                <div className="absolute left-3 top-2.5 text-gray-400 group-focus-within:text-emerald-500 transition-colors">
+                  <Search size={16} />
+                </div>
+                {/* Botón de búsqueda más moderno */}
+                <button 
+                  type="submit" 
+                  className="absolute right-1.5 top-1.5 bg-emerald-600 text-white p-1.5 rounded-full hover:bg-emerald-700 transition-all shadow-sm"
+                >
+                  <Search size={14} />
+                </button>
+              </form>
 
-        {/* BUSCADOR */}
-        <div className="hidden items-center gap-3 xl:flex">
-          <div className={`flex items-center rounded-full px-4 py-2 transition-all duration-300 ${
-            isScrolled 
-            ? "bg-gray-50 border border-gray-200" 
-            : "bg-white/20 border border-white/30 backdrop-blur-sm"
-          } focus-within:border-[var(--norvet-green)] focus-within:ring-2 focus-within:ring-[var(--norvet-green)]/20`}>
-            <Search size={18} className={isScrolled ? "text-gray-400" : "text-slate-600"} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Buscar productos..."
-              className={`ml-2 w-40 lg:w-56 bg-transparent outline-none text-sm transition-colors ${
-                isScrolled ? "text-slate-700 placeholder:text-gray-400" : "text-slate-800 placeholder:text-slate-500"
-              }`}
-            />
-          </div>
-          <button onClick={handleSearch} className="rounded-full bg-[var(--norvet-green)] px-6 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-[var(--norvet-green-dark)] active:scale-95">
-            Buscar
+              {/* DESPLEGABLE DE RESULTADOS */}
+              {searchResults.length > 0 && (
+                <div className="absolute top-full left-0 w-full mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-2 duration-200">
+                  {searchResults.map((prod) => (
+                    <Link 
+                      key={prod.id} 
+                      href={`/productos/${prod.id}`}
+                      className="flex items-center gap-3 p-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-none"
+                      onClick={() => setSearchQuery("")} // Limpiar al seleccionar un producto
+                    >
+                      <div className="relative w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                        <Image src={prod.imagen_url || "/images/placeholder.jpg"} alt={prod.nombre} fill className="object-contain" />
+                      </div>
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="text-sm font-bold text-slate-800 truncate">{prod.nombre}</span>
+                        <span className="text-[10px] text-gray-400 truncate">{prod.descripcion_corta}</span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </nav>
+
+          <button className="md:hidden p-2 text-slate-800" onClick={() => setIsMobileMenuOpen(true)}>
+            <Menu size={28} />
           </button>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* MENU MÓVIL */}
+      {isMobileMenuOpen && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-[60] backdrop-blur-sm transition-opacity" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="fixed top-0 left-0 h-full w-[280px] bg-white z-[70] shadow-2xl transition-transform duration-300 flex flex-col p-6">
+            <div className="flex justify-between items-center mb-10">
+              <span className="text-xl font-bold text-[var(--norvet-green)]">Menú</span>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-gray-500">
+                <CloseIcon size={24} />
+              </button>
+            </div>
+            <nav className="flex flex-col gap-4">
+              {navLinks.map((link) => (
+                <Link key={link.name} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="text-slate-700 hover:text-[var(--norvet-green)] font-bold text-lg p-3 rounded-xl hover:bg-gray-50 transition-all">
+                  {link.name}
+                </Link>
+              ))}
+            </nav>
+            <div className="mt-auto pb-10">
+              <button className="w-full bg-[var(--norvet-green)] text-white py-4 rounded-2xl font-bold shadow-lg">Contactar Ahora</button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
+import { motion, AnimatePresence } from "framer-motion";
+import { X  } from "lucide-react";
 

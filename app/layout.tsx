@@ -3,7 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import TopBar from "@/components/layout/TopBar";
 import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/home/Footer"; // Ajusta la ruta si es necesario
+import Footer from "@/components/home/Footer";
+import Script from "next/script"; // <--- 1. IMPORTAMOS EL COMPONENTE SCRIPT
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,12 +29,11 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        {/* EL MENÚ ESTÁ AQUÍ: Ahora aparecerá en TODAS las páginas */}
+        {/* 2. AGREGAMOS EL SCRIPT AQUÍ */}
+
         <TopBar />
         <Navbar />
         
-        {/* El children es donde se cargará el contenido de cada página (Home, Productos, etc.) */}
-        {/* Añadimos el pt-[120px] aquí para que ninguna página se tape con el navbar */}
         <main className="flex-grow pt-[120px]">
           {children}
         </main>
