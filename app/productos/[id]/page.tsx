@@ -87,7 +87,7 @@ export default function ProductDetail() {
   const whatsappMessage = encodeURIComponent(
     `Hola Norvet, estoy interesado en el producto: ${product.nombre}. ¿Podrían darme más información?`,
   );
-  const whatsappUrl = `https://wa.me/51999999999?text=${whatsappMessage}`;
+  const whatsappUrl = `https://wa.me/51948092846?text=${whatsappMessage}`;
 
   return (
     <div className="min-h-screen bg-[#FBFBFA] pb-20">

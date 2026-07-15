@@ -14,9 +14,9 @@ export default function TopBar() {
           </a>
 
           <div className="hidden items-center gap-2 md:flex">
-            <a href="tel:+51999999999" className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-all">
+            <a href="tel:+51948092846" className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-all">
               <Phone size={16} /> {/* Aumentamos un poco el icono de teléfono */}
-              <span>+51 999 999 999</span>
+              <span>+51 948 092 846</span>
             </a>
           </div>
         </div>
@@ -26,7 +26,7 @@ export default function TopBar() {
           
           {/* Facebook */}
           <a 
-            href="https://facebook.com/tuperfil" 
+            href="https://www.facebook.com/profile.php?id=100064733556399" 
             target="_blank" 
             rel="noopener noreferrer"
             className="group relative p-1.5 bg-white/10 hover:bg-white/20 rounded-full transition-all duration-300"
