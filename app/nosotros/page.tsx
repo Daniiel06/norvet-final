@@ -73,7 +73,7 @@ export default function NosotrosPage() {
             {/* Imagen Principal */}
             <div className="absolute top-0 right-0 w-4/5 h-[80%] rounded-[60px_20px_60px_20px] overflow-hidden shadow-2xl z-10 border-4 border-white">
               <Image 
-                src="/images/about-banner.jpg" 
+                src="/images/about-company2.jpg" 
                 alt="Norvet Hero" 
                 fill 
                 className="object-cover" 
@@ -82,7 +82,7 @@ export default function NosotrosPage() {
             {/* Imagen Secundaria superpuesta */}
             <div className="absolute bottom-0 left-0 w-1/2 h-1/2 rounded-[20px_60px_20px_60px] overflow-hidden shadow-2xl z-20 border-8 border-white">
               <Image 
-                src="/images/about-company.jpg" 
+                src="/images/about-company2.jpg" 
                 alt="Norvet Equipo" 
                 fill 
                 className="object-cover" 
@@ -108,7 +108,7 @@ export default function NosotrosPage() {
                 className="relative z-10 rounded-[40px] overflow-hidden shadow-2xl"
               >
                 <Image 
-                  src="/images/about-company.jpg" 
+                  src="/images/about-company2.jpg" 
                   alt="Pasión Norvet" 
                   width={600} 
                   height={600} 

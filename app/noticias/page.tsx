@@ -1,17 +1,34 @@
 "use client";
 
-import { news } from "@/data/news";
+import { supabase } from "@/lib/supabase"; // Asegúrate de que la ruta sea correcta
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function NoticiasPage() {
+  const [news, setNews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("Todos");
   const categories = ["Todos", "Local", "Internacional"];
 
+  useEffect(() => {
+    async function loadNews() {
+      setLoading(true);
+      const { data } = await supabase
+        .from("noticias")
+        .select("*")
+        .order("fecha_creacion", { ascending: false });
+      setNews(data || []);
+      setLoading(false);
+    }
+    loadNews();
+  }, []);
+
   const filteredNews = filter === "Todos" 
     ? news 
-    : news.filter(n => n.category === filter);
+    : news.filter(n => n.categoria === filter);
+
+  if (loading) return <div className="pt-32 text-center">Cargando noticias...</div>;
 
   return (
     <div className="min-h-screen pt-[120px] bg-gray-50 pb-20">
@@ -55,17 +72,19 @@ export default function NoticiasPage() {
               className="bg-white rounded-[30px] overflow-hidden shadow-sm hover:shadow-xl transition-all border border-gray-100 flex flex-col"
             >
               <div className="relative h-56 w-full">
-                <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+                <img src={item.imagen_url} alt={item.titulo} className="w-full h-full object-cover" />
                 <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[var(--norvet-green)] text-[10px] font-bold px-3 py-1 rounded-full uppercase">
-                  {item.category}
+                  {item.categoria}
                 </span>
               </div>
 
               <div className="p-6 flex flex-col flex-grow">
-                <p className="text-xs text-gray-400 font-medium mb-2">{item.date}</p>
-                <h3 className="text-xl font-bold text-slate-800 mb-3 leading-tight">{item.title}</h3>
+                <p className="text-xs text-gray-400 font-medium mb-2">
+                  {new Date(item.fecha_creacion).toLocaleDateString()}
+                </p>
+                <h3 className="text-xl font-bold text-slate-800 mb-3 leading-tight">{item.titulo}</h3>
                 <p className="text-sm text-gray-600 line-clamp-3 mb-6 flex-grow">
-                  {item.excerpt}
+                  {item.contenido.substring(0, 120)}... {/* Generamos el excerpt automáticamente */}
                 </p>
                 <Link 
                   href={`/noticias/${item.id}`}

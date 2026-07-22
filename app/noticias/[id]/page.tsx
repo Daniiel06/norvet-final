@@ -1,15 +1,32 @@
 "use client";
 
-import { news } from "@/data/news";
+import { supabase } from "@/lib/supabase";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Calendar } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function NewsDetail() {
   const { id } = useParams();
-  const item = news.find(n => n.id === id);
+  const [item, setItem] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    async function fetchNews() {
+      const { data, error } = await supabase
+        .from("noticias")
+        .select("*")
+        .eq("id", id)
+        .single();
+      
+      if (data) setItem(data);
+      setLoading(false);
+    }
+    fetchNews();
+  }, [id]);
+
+  if (loading) return <div className="pt-32 text-center">Cargando noticia...</div>;
   if (!item) return <div className="pt-32 text-center">Noticia no encontrada</div>;
 
   return (
@@ -26,29 +43,32 @@ export default function NewsDetail() {
           className="flex flex-col gap-8"
         >
           <div className="relative h-[400px] w-full rounded-[40px] overflow-hidden shadow-2xl">
-            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+            <img src={item.imagen_url} alt={item.titulo} className="w-full h-full object-cover" />
             <div className="absolute top-6 left-6 bg-[var(--norvet-green)] text-white px-4 py-1 rounded-full text-sm font-bold">
-              {item.category}
+              {item.categoria}
             </div>
           </div>
 
           <div className="flex items-center gap-4 text-gray-400 text-sm mb-4">
             <div className="flex items-center gap-1">
-              <Calendar size={16} /> {item.date}
+              <Calendar size={16} /> {new Date(item.fecha_creacion).toLocaleDateString()}
             </div>
             <span>•</span>
             <span>Tiempo de lectura: 3 min</span>
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black text-slate-900 leading-tight">
-            {item.title}
+            {item.titulo}
           </h1>
 
           <div className="text-lg text-gray-600 leading-relaxed space-y-6">
-            <p className="font-bold text-xl text-slate-800">{item.excerpt}</p>
-            <p>{item.content}</p>
-            {/* Puedes agregar más párrafos aquí si quieres */}
-            <p>Norvet continúa comprometida con la vanguardia de la medicina veterinaria, trayendo las mejores soluciones al mercado local.</p>
+            {/* Usamos el contenido directamente de la DB */}
+            <div className="whitespace-pre-line">
+              {item.contenido}
+            </div>
+            <p className="italic border-l-4 border-[var(--norvet-green)] pl-4 text-slate-500">
+              Norvet continúa comprometida con la vanguardia de la medicina veterinaria, trayendo las mejores soluciones al mercado local.
+            </p>
           </div>
         </motion.div>
       </div>
